@@ -68,8 +68,9 @@ function start (cb) {
   }
 
   function _shareDrive (next) {
-    process.env['CONTAINER_DRIVE_KEY'] = archive.key
-    console.log('sharing archive key:', archive.key.toString('hex'))
+    var hexKey = archive.key.toString('hex')
+    process.env['CONTAINER_DRIVE_KEY'] = hexKey
+    console.log('sharing archive key:', hexKey)
     pm2.connect(function (err) {
       if (err) return next(err)
       pm2.start({
@@ -231,7 +232,7 @@ function sendError (res, err) {
   res.writeHead(500, {
     'Content-Type': 'text/plain'
   })
-  res.end(err)
+  res.end(err.toString())
 }
 
 /**
