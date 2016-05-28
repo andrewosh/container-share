@@ -37,7 +37,7 @@ var db = levelup(conf.db)
 var drive = hyperdrive(db)
 
 var archiveKey = process.env['CONTAINER_DRIVE_KEY']
-var archive = drive.createArchive(archiveKey, {
+var archive = drive.createArchive(new Buffer(archiveKey, 'hex'), {
   live: true,
   file: function (name) {
     return raf('./torrents/' + name)
@@ -63,7 +63,7 @@ var server = http.createServer(function (req, res) {
  * Start seeding any images listed in the db
  */
 function start (cb) {
-  var hexKey = archive.key.toString('hex')
+  var hexKey = archiveKey.toString('hex')
   process.env['CONTAINER_DRIVE_KEY'] = hexKey
 
   function _seedTorrents (next) {
@@ -79,11 +79,10 @@ function start (cb) {
 
   function _shareDrive (next) {
     console.log('sharing archive key:', hexKey)
-    var link = new Buffer(hexKey, 'hex')
-    var archive = drive.createArchive(link)
     swarm.listen(conf.swarmPort)
-    swarm.join(link)
+    swarm.join(archiveKey)
     swarm.on('connection', function (conn) {
+      console.log('got a connection:', conn)
       conn.pipe(archive.replicate()).pipe(conn)
     })
     return next()
