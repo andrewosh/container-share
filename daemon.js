@@ -14,6 +14,8 @@ var Router = require('router')
 var morgan = require('morgan')
 var levelup = require('level')
 var hyperdrive = require('hyperdrive')
+var concat = require('concat-stream')
+var raf = require('random-access-file')
 var bodyParser = require('body-parser')
 var nid = require('nid')
 
@@ -35,7 +37,10 @@ var drive = hyperdrive(db)
 
 var archiveKey = process.env['CONTAINER_DRIVE_KEY']
 var archive = drive.createArchive(archiveKey, {
-  live: true
+  live: true,
+  file: function (name) {
+    return raf('./torrents/' + name)
+  }
 })
 archiveKey = archive.key
 
@@ -44,6 +49,7 @@ var makeId = nid({
   length: conf.idLength
 })
 var seeding = {}
+var torrents = []
 
 var router = Router()
 router.use(bodyParser.json())
@@ -56,6 +62,9 @@ var server = http.createServer(function (req, res) {
  * Start seeding any images listed in the db
  */
 function start (cb) {
+  var hexKey = archive.key.toString('hex')
+  process.env['CONTAINER_DRIVE_KEY'] = hexKey
+
   function _seedTorrents (next) {
     listSeedableTorrents(function (err, torrents) {
       if (err) return cb(err)
@@ -68,8 +77,6 @@ function start (cb) {
   }
 
   function _shareDrive (next) {
-    var hexKey = archive.key.toString('hex')
-    process.env['CONTAINER_DRIVE_KEY'] = hexKey
     console.log('sharing archive key:', hexKey)
     pm2.connect(function (err) {
       if (err) return next(err)
@@ -81,7 +88,7 @@ function start (cb) {
       })
     })
   }
-  
+
   async.series([
     _seedTorrents,
     _shareDrive
@@ -212,12 +219,20 @@ function createTorrent (cont, cb) {
 }
 
 /**
- * List all downloadable torrents stored in the hyperdrive archive
+ * Return a stream of downloadable torrents stored in the hyperdrive archive
  */
 function listDownloadableTorrents (cb) {
-  archive.list(function (err, torrents) {
-    if (err) return cb(err)
-    return cb(null, torrents)
+  var stream = archive.list({ live: false })
+  var torrents = []
+  stream.on('error', function (err) {
+    return cb(err)
+  })
+  stream.on('data', function (data) {
+    torrents.push(data)
+    debug('torrents is now:', torrents)
+  })
+  stream.on('end', function () {
+    return cb(null, torrents.map(function (t) { return t.name }))
   })
 }
 
@@ -247,10 +262,7 @@ router.get('/seeding', function (req, res) {
  */
 router.get('/torrents', function (req, res) {
   listDownloadableTorrents(function (err, torrents) {
-    if (err) {
-      debug('could not list torrents:', err)
-      sendError(res, err)
-    }
+    if (err) return sendError(res, err)
     return sendJson(res, torrents)
   })
 })
