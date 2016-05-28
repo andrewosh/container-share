@@ -44,7 +44,8 @@
     "nid": "^0.3.2",
     "rc": "^1.1.6",
     "router": "^1.1.4",
-    "standard": "^7.1.1"
+    "standard": "^7.1.1",
+    "torrent-docker": "^1.6.0"
   },
   "devDependencies": {
     "istanbul": "^0.4.3",
