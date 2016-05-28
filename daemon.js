@@ -37,7 +37,7 @@ var db = levelup(conf.db)
 var drive = hyperdrive(db)
 
 var existingKey = process.env['CONTAINER_DRIVE_KEY']
-var archiveKey = existingKey ? new Buffer(archiveKey, 'hex') : null
+var archiveKey = existingKey ? new Buffer(existingKey, 'hex') : null
 var archive = drive.createArchive(archiveKey, {
   live: true,
   file: function (name) {
