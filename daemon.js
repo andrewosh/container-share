@@ -18,7 +18,7 @@ var swarm = require('discovery-swarm')()
 var concat = require('concat-stream')
 var raf = require('random-access-file')
 var bodyParser = require('body-parser')
-var nid = require('nid')
+var randomstring = require('randomstring')
 
 var appName = require('./package.json')['name']
 var debug = require('debug')(appName)
@@ -45,10 +45,13 @@ var archive = drive.createArchive(new Buffer(archiveKey, 'hex'), {
 })
 archiveKey = archive.key
 
-var makeId = nid({
-  hex: 1,
-  length: conf.idLength
-})
+var makeId = function () {
+  return randomstring.generate({
+    charset: 'hex',
+    capitalization: 'lowercase',
+    length: conf.idLength
+  })
+}
 var seeding = {}
 var torrents = []
 
