@@ -14,6 +14,7 @@ var Router = require('router')
 var morgan = require('morgan')
 var levelup = require('level')
 var hyperdrive = require('hyperdrive')
+var swarm = require('discovery-swarm')()
 var concat = require('concat-stream')
 var raf = require('random-access-file')
 var bodyParser = require('body-parser')
@@ -78,6 +79,15 @@ function start (cb) {
 
   function _shareDrive (next) {
     console.log('sharing archive key:', hexKey)
+    var link = new Buffer(hexKey, 'hex')
+    var archive = drive.createArchive(link)
+    swarm.listen(conf.swarmPort)
+    swarm.join(link)
+    swarm.on('connection', function (conn) {
+      conn.pipe(archive.replicate()).pipe(conn)
+    })
+    return next()
+    /*
     pm2.connect(function (err) {
       if (err) return next(err)
       pm2.start({
@@ -87,6 +97,7 @@ function start (cb) {
         return next(err)
       })
     })
+    */
   }
 
   async.series([
