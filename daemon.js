@@ -36,8 +36,9 @@ var docker = new Docker()
 var db = levelup(conf.db)
 var drive = hyperdrive(db)
 
-var archiveKey = process.env['CONTAINER_DRIVE_KEY']
-var archive = drive.createArchive(new Buffer(archiveKey, 'hex'), {
+var existingKey = process.env['CONTAINER_DRIVE_KEY']
+var archiveKey = existingKey ? new Buffer(archiveKey, 'hex') : null
+var archive = drive.createArchive(archiveKey, {
   live: true,
   file: function (name) {
     return raf('./torrents/' + name)
@@ -53,7 +54,6 @@ var makeId = function () {
   })
 }
 var seeding = {}
-var torrents = []
 
 var router = Router()
 router.use(bodyParser.json())
