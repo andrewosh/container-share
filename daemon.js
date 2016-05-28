@@ -85,7 +85,6 @@ function start (cb) {
     swarm.listen(conf.swarmPort)
     swarm.join(archiveKey)
     swarm.on('connection', function (conn) {
-      console.log('got a connection:', conn)
       conn.pipe(archive.replicate()).pipe(conn)
     })
     return next()
