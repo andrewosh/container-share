@@ -135,7 +135,8 @@ function listSeedableTorrents (cb) {
  * Optimistically seed (its data might not be available) a torrent in the conf.data directory
  */
 function startSeeding (torrent, cb) {
-  var torrentFile = path.join(conf.data, torrent + '.torrent')
+  var torrentName = torrent + '.torrent'
+  var torrentFile = path.join(conf.data, torrentName)
 
   // start the seeding process
   function _startSeedProc (next) {
@@ -152,7 +153,7 @@ function startSeeding (torrent, cb) {
 
   // write the torrent file to hyperdrive, so that it's discoverable
   function _shareImage (next) {
-    var hyperStream = archive.createFileWriteStream(torrent)
+    var hyperStream = archive.createFileWriteStream(torrentName)
     fs.createReadStream(torrentFile).pipe(hyperStream)
       .on('finish', function () {
         return next(null)
