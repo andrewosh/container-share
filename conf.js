@@ -1,5 +1,6 @@
 var appName = require('./package.json')['name']
 module.exports = require('rc')(appName, {
+  name: appName,
   port: 3000,
   swarmPort: 3001,
   db: 'torrents.db',

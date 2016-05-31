@@ -15,14 +15,13 @@ var morgan = require('morgan')
 var levelup = require('level')
 var hyperdrive = require('hyperdrive')
 var swarm = require('discovery-swarm')()
-var concat = require('concat-stream')
 var raf = require('random-access-file')
 var bodyParser = require('body-parser')
 var randomstring = require('randomstring')
 
-var appName = require('./package.json')['name']
-var debug = require('debug')(appName)
 var conf = require('./conf')
+var appName = conf.name
+var debug = require('debug')(appName)
 
 try {
   var binPath = proc.execSync('npm bin', { encoding: 'utf8' }).trim()
@@ -206,10 +205,14 @@ function stopSeeding (torrent, cb) {
 /**
  * Create a new torrent, but don't write the .torrent file to the hyperdrive archive
  */
-function createTorrent (cont, cb) {
+function createTorrent (cont, name, cb) {
+  if (typeof name === 'function') {
+    cb = name
+    name = null
+  }
   function _createImage (next) {
     var container = docker.getContainer(cont)
-    var id = makeId()
+    var id = name || makeId()
     container.commit({
       repo: id
     }, function (err) {
@@ -285,18 +288,35 @@ router.get('/torrents', function (req, res) {
  */
 router.post('/torrents', function (req, res) {
   var container = req.body.container
+  var torrentName = req.body.name
   debug('body:', JSON.stringify(req.body))
   if (!container) {
     return sendError(res, 'expecting field \'container\' in body\n')
   }
   async.waterfall([
-    partial(createTorrent, container),
+    partial(createTorrent, container, torrentName),
     startSeeding
   ], function (err, torrent) {
     if (err) return sendError(res, err)
     debug('created torrent:', torrent)
-    res.writeHead(200)
-    res.end()
+    sendJson(res, { torrent: torrent })
+  })
+})
+
+/**
+ * List all available containers
+ */
+router.get('/containers', function (req, res) {
+  docker.listContainers({ all: true }, function (err, containers) {
+    if (err) return sendError(res, err)
+    return sendJson(res, containers.map(function (cont) {
+      return {
+        id: cont['Id'],
+        state: cont['State'],
+        created: cont['Created'],
+        image: cont['Image']
+      }
+    }))
   })
 })
 
@@ -310,11 +330,15 @@ process.on('SIGINT', function () {
 /**
  * Start the daemon
  */
-start(function (err) {
-  if (err) {
-    console.error('could not start daemon:', err)
-    process.exit(2)
-  }
-  debug('starting server on port', conf.port)
-  server.listen(conf.port)
-})
+if (require.main === module) {
+  start(function (err) {
+    if (err) {
+      console.error('could not start daemon:', err)
+      process.exit(2)
+    }
+    debug('starting server on port', conf.port)
+    server.listen(conf.port)
+  })
+} else {
+  module.exports = start
+}

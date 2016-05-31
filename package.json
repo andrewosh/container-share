@@ -47,8 +47,10 @@
     "random-access-file": "^1.2.0",
     "randomstring": "^1.1.5",
     "rc": "^1.1.6",
+    "request": "^2.72.0",
     "router": "^1.1.4",
-    "standard": "^7.1.1"
+    "standard": "^7.1.1",
+    "url-join": "^1.1.0"
   },
   "devDependencies": {
     "istanbul": "^0.4.3",
