@@ -18,4 +18,5 @@ share.createTorrent(container, name, function (err, torrent) {
     process.exit(2)
   }
   console.log('\nSuccessfully created torrent:', torrent)
+  process.exit(0)
 })
