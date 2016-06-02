@@ -30,7 +30,6 @@
   },
   "homepage": "https://github.com/andrewosh/container-share#readme",
   "dependencies": {
-    "@andrewosh/docker-prebuilt": "^1.11.1",
     "@andrewosh/torrent-docker": "^1.6.0",
     "body-parser": "^1.15.1",
     "concat-stream": "^1.5.1",

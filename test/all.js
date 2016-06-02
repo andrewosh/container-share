@@ -1,9 +1,13 @@
 var test = require('tape')
 var request = require('request')
-var docker = require('dockerode')
+var Docker = require('dockerode')
 
 var conf = require('../conf')
 var start = require('../daemon')
+
+console.log('NOTE: these tests require the Docker daemon to be running locally')
+
+var docker = new Docker()
 
 start(function (err) {
   if (err) throw err
