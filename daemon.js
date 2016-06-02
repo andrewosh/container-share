@@ -37,7 +37,7 @@ var archiveKey = existingKey ? new Buffer(existingKey, 'hex') : null
 var archive = drive.createArchive(archiveKey, {
   live: true,
   file: function (name) {
-    return raf('./torrents/' + name)
+    return raf(path.join(conf.torrentsDir, name))
   }
 })
 archiveKey = archive.key

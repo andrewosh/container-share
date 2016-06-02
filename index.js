@@ -1,3 +1,4 @@
+var path = require('path')
 var proc = require('child_process')
 
 var request = require('request')
@@ -51,7 +52,8 @@ function listContainers (opts, cb) {
 
 function launchContainer (name, cb) {
   var id = util.makeId()
-  var child = proc.spawn(util.getTorrentBin(), ['boot', name, id], { stdio: 'inherit' })
+  var torrent = path.join(conf.torrentsDir, name)
+  var child = proc.spawn(util.getTorrentBin(), ['boot', torrent, id], { stdio: 'inherit' })
   child.on('error', function (err) {
     return cb(err)
   })
