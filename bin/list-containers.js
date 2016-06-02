@@ -18,4 +18,5 @@ share.listContainers(opts, function (err, containers) {
     process.exit(2)
   }
   console.log(containers)
+  process.exit(0)
 })

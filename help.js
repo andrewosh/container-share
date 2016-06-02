@@ -9,6 +9,8 @@ module.exports = function help () {
     run              boot a container from a torrent
     list-torrents    list all available torrents that can be booted
     list-containers  list all containers that can be shared
+    start-daemon     start the seeder daemon process
+    stop-daemon      stop the seeder daemon process
 
   Add --help after any command for detailed help`)
 }

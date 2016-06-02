@@ -8,7 +8,6 @@ var npmexec = require('npm-execspawn')
 
 var async = require('async')
 var partial = require('lodash.partial')
-var pm2 = require('pm2')
 var Docker = require('dockerode')
 var finalHandler = require('finalhandler')
 var Router = require('router')

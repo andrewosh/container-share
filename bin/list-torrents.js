@@ -15,4 +15,5 @@ share.listTorrents(function (err, torrents) {
     process.exit(2)
   }
   console.log(torrents)
+  process.exit(0)
 })

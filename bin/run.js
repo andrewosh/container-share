@@ -1,14 +1,15 @@
 var argv = require('minimist')(process.argv.slice(2), {
-  alias: { t: 'torrent', h: 'help' }
+  alias: { h: 'help' }
 })
 
 var share = require('..')
 
-if (!argv.torrent || argv.help) {
+if (argv.help) {
   console.log(require('../docs/run')())
   process.exit(0)
 }
-var torrent = argv.t || argv.torrent
+
+var torrent = argv._
 
 console.log('Booting up container from torrent:', torrent)
 share.launchContainer(torrent, function (err, torrent) {
@@ -17,4 +18,5 @@ share.launchContainer(torrent, function (err, torrent) {
     process.exit(2)
   }
   console.log('Container exited')
+  process.exit(0)
 })
