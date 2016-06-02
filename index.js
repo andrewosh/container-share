@@ -51,7 +51,7 @@ function listContainers (opts, cb) {
 
 function launchContainer (name, cb) {
   var id = util.makeId()
-  var child = proc.spawn('torrent-docker', ['boot', name, id], { stdio: 'inherit' })
+  var child = proc.spawn(util.getTorrentBin(), ['boot', name, id], { stdio: 'inherit' })
   child.on('error', function (err) {
     return cb(err)
   })

@@ -4,6 +4,7 @@ var fs = require('fs')
 var path = require('path')
 var http = require('http')
 var proc = require('child_process')
+var npmexec = require('npm-execspawn')
 
 var async = require('async')
 var partial = require('lodash.partial')
@@ -25,13 +26,7 @@ var util = require('./util')
 var appName = conf.name
 var debug = require('debug')(appName)
 
-try {
-  var binPath = proc.execSync('npm bin', { encoding: 'utf8' }).trim()
-  var torrentBin = path.join(binPath, 'torrent-docker')
-} catch (err) {
-  console.error('could not find torrent-docker bin')
-  process.exit(2)
-}
+var torrentBin = util.getTorrentBin()
 
 var docker = new Docker()
 var db = levelup(conf.db)
