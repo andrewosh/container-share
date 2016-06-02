@@ -17,7 +17,11 @@ function startUbuntu (cb) {
   
 }
 
-// start a ubuntu container, commit, seed, and live-boot
+// start a container
+// list running containers and see the above container
+// commit the container, write the torrent to hyperdrive, and verify that it's there
+// TODO: live-boot a container
+
 function runTests () {
   test('commit container', function (t) {
     t.plan(2)

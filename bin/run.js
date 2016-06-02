@@ -1,9 +1,12 @@
-var argv = require('minimist')(process.argv.slice(2))
+var argv = require('minimist')(process.argv.slice(2), {
+  alias: { t: 'torrent', h: 'help' }
+})
 
 var share = require('..')
 
-if (!argv.t && !argv.torrent) {
-  console.error('You must specify torrent name to launch')
+if (!argv.torrent || argv.help) {
+  console.log(require('../docs/run')())
+  process.exit(0)
 }
 var torrent = argv.t || argv.torrent
 

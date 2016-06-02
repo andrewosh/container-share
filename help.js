@@ -7,7 +7,7 @@ module.exports = function help () {
 
     create           create and seed a new Docker torrent
     run              boot a container from a torrent
-    list-images      list all available images
+    list-torrents    list all available torrents that can be booted
     list-containers  list all containers that can be shared
 
   Add --help after any command for detailed help`)

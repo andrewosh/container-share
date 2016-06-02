@@ -18,8 +18,10 @@ var swarm = require('discovery-swarm')()
 var raf = require('random-access-file')
 var bodyParser = require('body-parser')
 var randomstring = require('randomstring')
+var url = require('url')
 
 var conf = require('./conf')
+var util = require('./util')
 var appName = conf.name
 var debug = require('debug')(appName)
 
@@ -45,13 +47,7 @@ var archive = drive.createArchive(archiveKey, {
 })
 archiveKey = archive.key
 
-var makeId = function () {
-  return randomstring.generate({
-    charset: 'hex',
-    capitalization: 'lowercase',
-    length: conf.idLength
-  })
-}
+var makeId = util.makeId()
 var seeding = {}
 
 var router = Router()
@@ -87,17 +83,6 @@ function start (cb) {
       conn.pipe(archive.replicate()).pipe(conn)
     })
     return next()
-    /*
-    pm2.connect(function (err) {
-      if (err) return next(err)
-      pm2.start({
-        name: 'container-drive-seeder',
-        script: path.join(__dirname, 'share.js')
-      }, function (err) {
-        return next(err)
-      })
-    })
-    */
   }
 
   async.series([
@@ -179,12 +164,10 @@ function startSeeding (torrent, cb) {
 
 /**
  * Stop seeding (if the seeding process is currently running) a torrent file
- * 
+ *
  * Note: the torrent will still be listed in the hyperdrive, but there might not be seeds
  */
 function stopSeeding (torrent, cb) {
-  var torrentFile = path.join(conf.data, torrent + '.torrent')
-
   // stop the seeding process
   function _stopSeedProc (next) {
     var pid = seeding[torrent]
@@ -307,7 +290,9 @@ router.post('/torrents', function (req, res) {
  * List all available containers
  */
 router.get('/containers', function (req, res) {
-  docker.listContainers({ all: true }, function (err, containers) {
+  var params = url.parse(req.url, true).query
+  var all = (params && params.all) ? params.all : false
+  docker.listContainers({ all: all }, function (err, containers) {
     if (err) return sendError(res, err)
     return sendJson(res, containers.map(function (cont) {
       return {

@@ -4,6 +4,7 @@ var request = require('request')
 var urljoin = require('url-join')
 
 var conf = require('./conf')
+var util = require('./util')
 
 var baseUrl = 'http://localhost:' + conf.port
 
@@ -32,9 +33,15 @@ function listTorrents (cb) {
   })
 }
 
-function listContainers (cb) {
+function listContainers (opts, cb) {
+  if (typeof opts === 'function') {
+    cb = opts
+    opts = null
+  }
+  var all = (opts) ? opts.all : false
   request({
     url: urljoin(baseUrl, 'containers'),
+    qs: { all: all },
     json: true
   }, function (err, res, body) {
     if (err) return cb(err)
@@ -43,7 +50,8 @@ function listContainers (cb) {
 }
 
 function launchContainer (name, cb) {
-  var child = proc.spawn('torrent-docker', ['boot', name], { stdio: 'inherit' })
+  var id = util.makeId()
+  var child = proc.spawn('torrent-docker', ['boot', name, id], { stdio: 'inherit' })
   child.on('error', function (err) {
     return cb(err)
   })
