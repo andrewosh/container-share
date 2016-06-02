@@ -9,7 +9,12 @@ if (argv.help) {
   process.exit(0)
 }
 
-var torrent = argv._
+if (argv._.length !== 1) {
+  console.error('must specify a single image to launch')
+  process.exit(2)
+}
+
+var torrent = argv._[0]
 
 console.log('Booting up container from torrent:', torrent)
 share.launchContainer(torrent, function (err, torrent) {
